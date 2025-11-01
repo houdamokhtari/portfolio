@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Portfolio | بورتفوليو</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        background-color: #fafafa;
+        color: #222;
+        scroll-behavior: smooth;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background-color: white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      nav a {
+        margin: 0 10px;
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+      }
+      nav a:hover {
+        color: #007bff;
+      }
+      .lang-toggle {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      section {
+        padding: 4rem 2rem;
+        text-align: center;
+        max-width: 900px;
+        margin: auto;
+      }
+      h2 {
+        font-size: 2rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+      }
+      .project {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+      footer {
+        background-color: #f0f0f0;
+        text-align: center;
+        padding: 1rem;
+        margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="#home" data-en="Home" data-ar="الرئيسية">Home</a>
+        <a href="#about" data-en="About" data-ar="من أنا">About</a>
+        <a href="#projects" data-en="Projects" data-ar="المشاريع">Projects</a>
+        <a href="#skills" data-en="Skills" data-ar="المهارات">Skills</a>
+        <a href="#contact" data-en="Contact" data-ar="تواصل">Contact</a>
+      </nav>
+      <button class="lang-toggle">AR</button>
+    </header>
+
+    <section id="home">
+      <h2
+        data-en="Welcome to My Portfolio"
+        data-ar="مرحبًا بكم في بورتفوليو الخاص بي"
+      >
+        Welcome to My Portfolio
+      </h2>
+      <p
+        data-en="I am a Computer Science student passionate about web development and AI."
+        data-ar="أنا طالب في الإعلام الآلي شغوف بتطوير الويب والذكاء الاصطناعي."
+      ></p>
+    </section>
+
+    <section id="about">
+      <h2 data-en="About Me" data-ar="من أنا">About Me</h2>
+      <p
+        data-en="My name is Yacine Tchier, a Master's student in Data Engineering and Web Technologies."
+        data-ar="اسمي تشير ياسين، طالب ماستر في هندسة البيانات وتقنيات الويب."
+      ></p>
+    </section>
+
+    <section id="projects">
+      <h2 data-en="My Projects" data-ar="مشاريعي">My Projects</h2>
+      <div class="project">
+        <h3
+          data-en="Project 1: AI Chatbot"
+          data-ar="المشروع 1: روبوت دردشة بالذكاء الاصطناعي"
+        >
+          Project 1: AI Chatbot
+        </h3>
+        <p
+          data-en="A chatbot built using JavaScript and FastAPI."
+          data-ar="روبوت دردشة بُني باستخدام JavaScript وFastAPI."
+        ></p>
+      </div>
+      <div class="project">
+        <h3
+          data-en="Project 2: Voice of Palestine Website"
+          data-ar="المشروع 2: موقع صوت فلسطين"
+        >
+          Project 2: Voice of Palestine Website
+        </h3>
+        <p
+          data-en="A bilingual website with articles, videos, and an AI tool."
+          data-ar="موقع ثنائي اللغة يحتوي على مقالات، فيديوهات، وأداة ذكاء اصطناعي."
+        ></p>
+      </div>
+    </section>
+
+    <section id="skills">
+      <h2 data-en="Skills" data-ar="المهارات">Skills</h2>
+      <p
+        data-en="HTML, CSS, JavaScript, FastAPI, Python, R, Git"
+        data-ar="HTML، CSS، JavaScript، FastAPI، Python، R، Git"
+      ></p>
+    </section>
+
+    <section id="contact">
+      <h2 data-en="Contact Me" data-ar="تواصل معي">Contact Me</h2>
+      <p
+        data-en="Email: yourname@example.com"
+        data-ar="البريد الإلكتروني: yourname@example.com"
+      ></p>
+    </section>
+
+    <footer>
+      <p
+        data-en="© 2025 Yacine Tchier. All rights reserved."
+        data-ar="© 2025 تشير ياسين. جميع الحقوق محفوظة."
+      ></p>
+    </footer>
+
+    <script>
+      const toggleBtn = document.querySelector(".lang-toggle");
+      let currentLang = "en";
+
+      toggleBtn.addEventListener("click", () => {
+        currentLang = currentLang === "en" ? "ar" : "en";
+        document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
+        toggleBtn.textContent = currentLang === "ar" ? "EN" : "AR";
+
+        document.querySelectorAll("[data-en]").forEach((el) => {
+          el.textContent = el.getAttribute(`data-${currentLang}`);
+        });
+      });
+    </script>
+  </body>
+</html>
