@@ -1,302 +1,458 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio - Mokhtari Nour El Houda</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-    * { font-family: 'Cairo', sans-serif; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio - Mokhtari Nour El Houda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
 </head>
-
 <body>
-  <div id="root"></div>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+        // Mock local storage
+        const mockStorage = {
+            async get(key) {
+                const stored = localStorage.getItem(key);
+                if (stored) return { key, value: stored };
+                throw new Error('Key not found');
+            },
+            async set(key, value) {
+                localStorage.setItem(key, value);
+                return { key, value };
+            },
+            async delete(key) {
+                localStorage.removeItem(key);
+                return { key, deleted: true };
+            },
+        };
 
-    // Mock local storage
-    const mockStorage = {
-      async get(key) {
-        const stored = localStorage.getItem(key);
-        if (stored) return { key, value: stored };
-        throw new Error('Key not found');
-      },
-      async set(key, value) {
-        localStorage.setItem(key, value);
-        return { key, value };
-      },
-      async delete(key) {
-        localStorage.removeItem(key);
-        return { key, deleted: true };
-      },
-    };
+        function Portfolio() {
+            const [userRole, setUserRole] = useState('student');
+            const [tps, setTps] = useState([]);
+            const [showUploadForm, setShowUploadForm] = useState(false);
+            const [formData, setFormData] = useState({ tpFile: null, image: null, tpName: '' });
 
-    function Portfolio() {
-      const [userRole, setUserRole] = useState('student');
-      const [tps, setTps] = useState([]);
-      const [showUploadForm, setShowUploadForm] = useState(false);
-      const [formData, setFormData] = useState({ tpFile: null, image: null, tpName: '' });
+            // بيانات الصورة الشخصية والمشاريع
+            const profileData = {
+                // أضف رابط صورتك الشخصية هنا
+                profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                // أو استخدم إيموجي كبديل إذا لم يكن لديك صورة
+                useEmoji: true,
+                profileEmoji: "👩‍💻"
+            };
 
-      useEffect(() => { loadTPs(); }, []);
+            const projects = [
+                { 
+                    title: 'موقع فلسطين', 
+                    description: 'موقع إعلامي شامل عن فلسطين', 
+                    tech: ['HTML','CSS','JavaScript'], 
+                    color: 'from-green-500 to-emerald-600',
+                    link: "https://example.com/palestine", // أضف رابط مشروعك هنا
+                    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                    github: "https://github.com/yourusername/palestine-website" // رابط GitHub إذا موجود
+                },
+                { 
+                    title: 'موقع لوازم حلويات', 
+                    description: 'متجر إلكتروني لبيع لوازم الحلويات', 
+                    tech: ['PHP','JavaScript','CSS'], 
+                    color: 'from-pink-500 to-rose-600',
+                    link: "https://example.com/sweets-store",
+                    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                    github: "https://github.com/yourusername/sweets-store"
+                },
+                { 
+                    title: 'موقع أرصاد جوية', 
+                    description: 'تطبيق للتنبؤات الجوية', 
+                    tech: ['JavaScript','API','CSS'], 
+                    color: 'from-blue-500 to-cyan-600',
+                    link: "https://example.com/weather-app",
+                    image: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                    github: "https://github.com/yourusername/weather-app"
+                },
+                { 
+                    title: 'Chatbot', 
+                    description: 'روبوت محادثة ذكي', 
+                    tech: ['Python','NLP'], 
+                    color: 'from-purple-500 to-indigo-600',
+                    link: "https://example.com/chatbot",
+                    image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                    github: "https://github.com/yourusername/chatbot"
+                },
+            ];
 
-      const loadTPs = async () => {
-        try {
-          const result = await mockStorage.get('portfolio-tps');
-          if (result) setTps(JSON.parse(result.value));
-        } catch {
-          setTps([]);
-        }
-      };
+            const skills = [
+                { name: 'Python', level: 90, icon: '🐍' },
+                { name: 'Java', level: 85, icon: '☕' },
+                { name: 'JavaScript', level: 88, icon: '⚡' },
+                { name: 'PHP', level: 80, icon: '🐘' },
+                { name: 'HTML', level: 95, icon: '📄' },
+                { name: 'CSS', level: 92, icon: '🎨' },
+                { name: 'Figma', level: 85, icon: '🎯' },
+            ];
 
-      const saveTPs = async (newTps) => {
-        await mockStorage.set('portfolio-tps', JSON.stringify(newTps));
-        setTps(newTps);
-      };
+            useEffect(() => {
+                loadTPs();
+            }, []);
 
-      const handleFileChange = (e, type) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            setFormData((prev) => ({
-              ...prev,
-              [type]: { name: file.name, data: event.target.result, type: file.type },
-            }));
-          };
-          reader.readAsDataURL(file);
-        }
-      };
+            const loadTPs = async () => {
+                try {
+                    const result = await mockStorage.get('portfolio-tps');
+                    if (result) setTps(JSON.parse(result.value));
+                } catch {
+                    setTps([]);
+                }
+            };
 
-      const handleUpload = async () => {
-        if (formData.tpFile && formData.image && formData.tpName) {
-          const newTP = {
-            id: Date.now(),
-            name: formData.tpName,
-            tpFile: formData.tpFile,
-            image: formData.image,
-            uploadDate: new Date().toLocaleDateString('ar-DZ'),
-            corrected: false,
-          };
-          const updatedTps = [...tps, newTP];
-          await saveTPs(updatedTps);
-          setFormData({ tpFile: null, image: null, tpName: '' });
-          setShowUploadForm(false);
-        }
-      };
+            const saveTPs = async (newTps) => {
+                await mockStorage.set('portfolio-tps', JSON.stringify(newTps));
+                setTps(newTps);
+            };
 
-      const handleDownload = (file, fileName) => {
-        const link = document.createElement('a');
-        link.href = file.data;
-        link.download = fileName;
-        link.click();
-      };
+            const handleFileChange = (e, type) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        setFormData((prev) => ({
+                            ...prev,
+                            [type]: { name: file.name, data: event.target.result, type: file.type },
+                        }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
 
-      const handleDelete = async (id) => {
-        if (confirm('هل أنت متأكد من حذف هذا الـTP؟')) {
-          const updatedTps = tps.filter((tp) => tp.id !== id);
-          await saveTPs(updatedTps);
-        }
-      };
+            const handleUpload = async () => {
+                if (formData.tpFile && formData.image && formData.tpName) {
+                    const newTP = {
+                        id: Date.now(),
+                        name: formData.tpName,
+                        tpFile: formData.tpFile,
+                        image: formData.image,
+                        uploadDate: new Date().toLocaleDateString('ar-DZ'),
+                        corrected: false,
+                    };
+                    const updatedTps = [...tps, newTP];
+                    await saveTPs(updatedTps);
+                    setFormData({ tpFile: null, image: null, tpName: '' });
+                    setShowUploadForm(false);
+                }
+            };
 
-      const skills = [
-        { name: 'Python', level: 90, icon: '🐍' },
-        { name: 'Java', level: 85, icon: '☕' },
-        { name: 'JavaScript', level: 88, icon: '⚡' },
-        { name: 'PHP', level: 80, icon: '🐘' },
-        { name: 'HTML', level: 95, icon: '📄' },
-        { name: 'CSS', level: 92, icon: '🎨' },
-        { name: 'Figma', level: 85, icon: '🎯' },
-      ];
+            const handleDownload = (file, fileName) => {
+                const link = document.createElement('a');
+                link.href = file.data;
+                link.download = fileName;
+                link.click();
+            };
 
-      const projects = [
-        { title: 'موقع فلسطين', description: 'موقع إعلامي شامل عن فلسطين', tech: ['HTML','CSS','JavaScript'], color: 'from-green-500 to-emerald-600' },
-        { title: 'موقع لوازم حلويات', description: 'متجر إلكتروني لبيع لوازم الحلويات', tech: ['PHP','JavaScript','CSS'], color: 'from-pink-500 to-rose-600' },
-        { title: 'موقع أرصاد جوية', description: 'تطبيق للتنبؤات الجوية', tech: ['JavaScript','API','CSS'], color: 'from-blue-500 to-cyan-600' },
-        { title: 'Chatbot', description: 'روبوت محادثة ذكي', tech: ['Python','NLP'], color: 'from-purple-500 to-indigo-600' },
-      ];
+            const handleDelete = async (id) => {
+                if (confirm('هل أنت متأكد من حذف هذا الـTP؟')) {
+                    const updatedTps = tps.filter((tp) => tp.id !== id);
+                    await saveTPs(updatedTps);
+                }
+            };
 
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
-          {/* Switcher */}
-          <div className="fixed top-4 right-4 z-50 flex gap-2">
-            <button onClick={() => setUserRole('student')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-                userRole === 'student' ? 'bg-purple-600 shadow-lg shadow-purple-500/50' : 'bg-slate-700 hover:bg-slate-600'
-              }`}>👩‍🎓 طالبة</button>
-            <button onClick={() => setUserRole('teacher')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-                userRole === 'teacher' ? 'bg-emerald-600 shadow-lg shadow-emerald-500/50' : 'bg-slate-700 hover:bg-slate-600'
-              }`}>👩‍🏫 أستاذة</button>
-          </div>
+            const openLink = (url) => {
+                if (url && url !== "https://example.com/...") {
+                    window.open(url, '_blank');
+                } else {
+                    alert('الرابط غير متوفر حالياً');
+                }
+            };
 
-          {/* Header */}
-          <header className="container mx-auto px-6 pt-20 pb-16">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="relative group">
-                <div className="w-40 h-40 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-1">
-                  <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
-                    <span className="text-6xl">👩‍💻</span>
-                  </div>
-                </div>
-                <div className="absolute inset-0 rounded-full bg-purple-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
-              </div>
-
-              <div className="text-center md:text-right flex-1">
-                <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Mokhtari Nour El Houda
-                </h1>
-                <p className="text-2xl text-purple-300 mb-4">IDTW M2 G2</p>
-              </div>
-            </div>
-          </header>
-
-          {/* Skills */}
-          <section className="container mx-auto px-6 py-16">
-            <h2 className="text-4xl font-bold mb-12 text-center">المهارات التقنية</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {skills.map((skill, index) => (
-                <div key={index} className="bg-slate-800/50 p-6 rounded-xl border border-purple-500/20">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xl font-semibold">{skill.name}</span>
-                    <span className="text-3xl">{skill.icon}</span>
-                  </div>
-                  <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full" style={{ width: `${skill.level}%` }}></div>
-                  </div>
-                  <p className="text-right mt-2 text-sm text-purple-300">{skill.level}%</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Projects */}
-          <section className="container mx-auto px-6 py-16">
-            <h2 className="text-4xl font-bold mb-12 text-center">المشاريع</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {projects.map((project, i) => (
-                <div key={i} className="bg-slate-800/50 p-6 rounded-xl border border-purple-500/20">
-                  <div className={`h-32 bg-gradient-to-r ${project.color} flex items-center justify-center`}>
-                    <span className="text-6xl">💻</span>
-                  </div>
-                  <div className="p-6 text-right">
-                    <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
-                    <p className="text-slate-300 mb-4">{project.description}</p>
-                    <div className="flex gap-2 flex-wrap justify-end">
-                      {project.tech.map((t, j) => (
-                        <span key={j} className="bg-purple-500/20 px-3 py-1 rounded-full text-sm text-purple-300">{t}</span>
-                      ))}
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+                    {/* Switcher */}
+                    <div className="fixed top-4 right-4 z-50 flex gap-2">
+                        <button 
+                            onClick={() => setUserRole('student')} 
+                            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+                                userRole === 'student' 
+                                ? 'bg-purple-600 shadow-lg shadow-purple-500/50' 
+                                : 'bg-slate-700 hover:bg-slate-600'
+                            }`}
+                        >
+                            👩‍🎓 طالبة
+                        </button>
+                        <button 
+                            onClick={() => setUserRole('teacher')} 
+                            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
+                                userRole === 'teacher' 
+                                ? 'bg-emerald-600 shadow-lg shadow-emerald-500/50' 
+                                : 'bg-slate-700 hover:bg-slate-600'
+                            }`}
+                        >
+                            👩‍🏫 أستاذة
+                        </button>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
 
-          {/* TPs */}
-          <section className="container mx-auto px-6 py-16">
-            <div className="bg-slate-800/50 rounded-xl p-8 border border-purple-500/20">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-bold">إدارة الأعمال التطبيقية (TPs)</h2>
-                {userRole === 'student' && (
-                  <button onClick={() => setShowUploadForm(!showUploadForm)}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700">
-                    ⬆️ إضافة TP جديد
-                  </button>
-                )}
-              </div>
-
-              {/* Upload Form */}
-              {userRole === 'student' && showUploadForm && (
-                <div className="bg-slate-900/50 rounded-lg p-6 mb-8 border border-purple-500/30">
-                  <h3 className="text-2xl font-bold mb-4 text-right">رفع TP جديد</h3>
-                  <div className="space-y-4">
-                    <input type="text" placeholder="اسم TP"
-                      value={formData.tpName}
-                      onChange={(e) => setFormData({ ...formData, tpName: e.target.value })}
-                      className="w-full bg-slate-800 border border-purple-500/30 rounded-lg px-4 py-3 text-white text-right" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-right mb-2">ملف TP (Blender)</label>
-                        <input type="file" accept=".blend" onChange={(e) => handleFileChange(e, 'tpFile')}
-                          className="w-full bg-slate-800 border border-purple-500/30 rounded-lg px-4 py-3" />
-                        {formData.tpFile && <p className="text-sm text-green-400 mt-2 text-right">✓ {formData.tpFile.name}</p>}
-                      </div>
-                      <div>
-                        <label className="block text-right mb-2">صورة المشروع</label>
-                        <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, 'image')}
-                          className="w-full bg-slate-800 border border-purple-500/30 rounded-lg px-4 py-3" />
-                        {formData.image && <p className="text-sm text-green-400 mt-2 text-right">✓ {formData.image.name}</p>}
-                      </div>
-                    </div>
-                    <button onClick={handleUpload}
-                      disabled={!formData.tpFile || !formData.image || !formData.tpName}
-                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50">
-                      رفع TP
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* TP List */}
-              <div className="space-y-4">
-                {tps.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400">
-                    <div className="text-6xl mb-4">📄</div>
-                    <p className="text-xl">لا توجد أعمال تطبيقية حالياً</p>
-                  </div>
-                ) : (
-                  tps.map((tp) => (
-                    <div key={tp.id} className="bg-slate-900/50 rounded-lg p-6 border border-purple-500/30">
-                      <div className="flex flex-col md:flex-row items-start gap-6">
-                        <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden bg-slate-800">
-                          <img src={tp.image.data} alt={tp.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 text-right">
-                          <h3 className="text-2xl font-bold mb-2">{tp.name}</h3>
-                          <p className="text-slate-400 mb-4">تاريخ الرفع: {tp.uploadDate}</p>
-                          <div className="flex gap-3 flex-wrap justify-end">
-                            {userRole === 'teacher' && (
-                              <>
-                                <button onClick={() => handleDownload(tp.tpFile, tp.tpFile.name)} className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">⬇️ تحميل ملف Blender</button>
-                                <button onClick={() => handleDownload(tp.image, tp.image.name)} className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg">⬇️ تحميل الصورة</button>
-                              </>
-                            )}
-                            {userRole === 'student' && (
-                              <>
-                                <div className="bg-slate-800 px-4 py-2 rounded-lg">
-                                  <span className={tp.corrected ? 'text-green-400' : 'text-yellow-400'}>
-                                    {tp.corrected ? '✓ تم التصحيح' : '⏳ قيد التصحيح'}
-                                  </span>
+                    {/* Header */}
+                    <header className="container mx-auto px-6 pt-20 pb-16">
+                        <div className="flex flex-col md:flex-row items-center gap-8">
+                            <div className="relative group">
+                                <div className="w-40 h-40 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-1">
+                                    <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
+                                        {profileData.useEmoji ? (
+                                            <span className="text-6xl">{profileData.profileEmoji}</span>
+                                        ) : (
+                                            <img 
+                                                src={profileData.profileImage} 
+                                                alt="الصورة الشخصية"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        )}
+                                    </div>
                                 </div>
-                                <button onClick={() => handleDelete(tp.id)} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">
-                                  🗑️ حذف
-                                </button>
-                              </>
-                            )}
-                          </div>
+                                <div className="absolute inset-0 rounded-full bg-purple-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
+                            </div>
+                            <div className="text-center md:text-right flex-1">
+                                <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    Mokhtari Nour El Houda
+                                </h1>
+                                <p className="text-2xl text-purple-300 mb-4">IDTW M2 G2</p>
+                                <div className="flex gap-4 justify-center md:justify-end mt-6">
+                                    <button 
+                                        onClick={() => openLink("https://github.com/yourusername")}
+                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+                                    >
+                                        <span>🐙</span>
+                                        GitHub
+                                    </button>
+                                    <button 
+                                        onClick={() => openLink("https://linkedin.com/in/yourprofile")}
+                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+                                    >
+                                        <span>💼</span>
+                                        LinkedIn
+                                    </button>
+                                    <button 
+                                        onClick={() => openLink("mailto:your.email@example.com")}
+                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+                                    >
+                                        <span>📧</span>
+                                        Email
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </section>
+                    </header>
 
-          <footer className="container mx-auto px-6 py-8 text-center border-t border-purple-500/20">
-            <p className="text-slate-400">© 2025 Mokhtari Nour El Houda - جميع الحقوق محفوظة</p>
-          </footer>
-        </div>
-      );
-    }
+                    {/* Skills */}
+                    <section className="container mx-auto px-6 py-16">
+                        <h2 className="text-4xl font-bold mb-12 text-center">المهارات التقنية</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {skills.map((skill, index) => (
+                                <div key={index} className="bg-slate-800/50 p-6 rounded-xl border border-purple-500/20">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-xl font-semibold">{skill.name}</span>
+                                        <span className="text-3xl">{skill.icon}</span>
+                                    </div>
+                                    <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                                        <div 
+                                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full" 
+                                            style={{ width: `${skill.level}%` }}
+                                        ></div>
+                                    </div>
+                                    <p className="text-right mt-2 text-sm text-purple-300">{skill.level}%</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
 
-    ReactDOM.render(<Portfolio />, document.getElementById('root'));
-  </script>
+                    {/* Projects */}
+                    <section className="container mx-auto px-6 py-16">
+                        <h2 className="text-4xl font-bold mb-12 text-center">المشاريع</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {projects.map((project, i) => (
+                                <div key={i} className="bg-slate-800/50 rounded-xl border border-purple-500/20 overflow-hidden hover:transform hover:scale-105 transition-all duration-300">
+                                    <div 
+                                        className={`h-48 bg-gradient-to-r ${project.color} relative overflow-hidden cursor-pointer`}
+                                        onClick={() => openLink(project.link)}
+                                    >
+                                        <img 
+                                            src={project.image} 
+                                            alt={project.title}
+                                            className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+                                        />
+                                        <div className="absolute inset-0 bg-black bg-opacity-40 hover:bg-opacity-20 transition-all"></div>
+                                    </div>
+                                    <div className="p-6 text-right">
+                                        <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
+                                        <p className="text-slate-300 mb-4">{project.description}</p>
+                                        <div className="flex gap-2 flex-wrap justify-end mb-4">
+                                            {project.tech.map((t, j) => (
+                                                <span key={j} className="bg-purple-500/20 px-3 py-1 rounded-full text-sm text-purple-300">
+                                                    {t}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <div className="flex gap-3 justify-end">
+                                            <button 
+                                                onClick={() => openLink(project.link)}
+                                                className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+                                            >
+                                                🌐 عرض المشروع
+                                            </button>
+                                            <button 
+                                                onClick={() => openLink(project.github)}
+                                                className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+                                            >
+                                                🐙 الكود المصدري
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* TPs */}
+                    <section className="container mx-auto px-6 py-16">
+                        <div className="bg-slate-800/50 rounded-xl p-8 border border-purple-500/20">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-4xl font-bold">إدارة الأعمال التطبيقية (TPs)</h2>
+                                {userRole === 'student' && (
+                                    <button 
+                                        onClick={() => setShowUploadForm(!showUploadForm)}
+                                        className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 flex items-center gap-2"
+                                    >
+                                        ⬆️ إضافة TP جديد
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Upload Form */}
+                            {userRole === 'student' && showUploadForm && (
+                                <div className="bg-slate-900/50 rounded-lg p-6 mb-8 border border-purple-500/30">
+                                    <h3 className="text-2xl font-bold mb-4 text-right">رفع TP جديد</h3>
+                                    <div className="space-y-4">
+                                        <input 
+                                            type="text" 
+                                            placeholder="اسم TP" 
+                                            value={formData.tpName}
+                                            onChange={(e) => setFormData({ ...formData, tpName: e.target.value })}
+                                            className="w-full bg-slate-800 border border-purple-500/30 rounded-lg px-4 py-3 text-white text-right"
+                                        />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-right mb-2">ملف TP (Blender)</label>
+                                                <input 
+                                                    type="file" 
+                                                    accept=".blend" 
+                                                    onChange={(e) => handleFileChange(e, 'tpFile')}
+                                                    className="w-full bg-slate-800 border border-purple-500/30 rounded-lg px-4 py-3"
+                                                />
+                                                {formData.tpFile && (
+                                                    <p className="text-sm text-green-400 mt-2 text-right">
+                                                        ✓ {formData.tpFile.name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="block text-right mb-2">صورة المشروع</label>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    onChange={(e) => handleFileChange(e, 'image')}
+                                                    className="w-full bg-slate-800 border border-purple-500/30 rounded-lg px-4 py-3"
+                                                />
+                                                {formData.image && (
+                                                    <p className="text-sm text-green-400 mt-2 text-right">
+                                                        ✓ {formData.image.name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={handleUpload}
+                                            disabled={!formData.tpFile || !formData.image || !formData.tpName}
+                                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50"
+                                        >
+                                            رفع TP
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* TP List */}
+                            <div className="space-y-4">
+                                {tps.length === 0 ? (
+                                    <div className="text-center py-12 text-slate-400">
+                                        <div className="text-6xl mb-4">📄</div>
+                                        <p className="text-xl">لا توجد أعمال تطبيقية حالياً</p>
+                                    </div>
+                                ) : (
+                                    tps.map((tp) => (
+                                        <div key={tp.id} className="bg-slate-900/50 rounded-lg p-6 border border-purple-500/30">
+                                            <div className="flex flex-col md:flex-row items-start gap-6">
+                                                <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden bg-slate-800">
+                                                    <img src={tp.image.data} alt={tp.name} className="w-full h-full object-cover" />
+                                                </div>
+                                                <div className="flex-1 text-right">
+                                                    <h3 className="text-2xl font-bold mb-2">{tp.name}</h3>
+                                                    <p className="text-slate-400 mb-4">تاريخ الرفع: {tp.uploadDate}</p>
+                                                    <div className="flex gap-3 flex-wrap justify-end">
+                                                        {userRole === 'teacher' && (
+                                                            <>
+                                                                <button 
+                                                                    onClick={() => handleDownload(tp.tpFile, tp.tpFile.name)}
+                                                                    className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center gap-2"
+                                                                >
+                                                                    ⬇️ تحميل ملف Blender
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDownload(tp.image, tp.image.name)}
+                                                                    className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg flex items-center gap-2"
+                                                                >
+                                                                    ⬇️ تحميل الصورة
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {userRole === 'student' && (
+                                                            <>
+                                                                <div className="bg-slate-800 px-4 py-2 rounded-lg">
+                                                                    <span className={tp.corrected ? 'text-green-400' : 'text-yellow-400'}>
+                                                                        {tp.corrected ? '✓ تم التصحيح' : '⏳ قيد التصحيح'}
+                                                                    </span>
+                                                                </div>
+                                                                <button 
+                                                                    onClick={() => handleDelete(tp.id)}
+                                                                    className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg flex items-center gap-2"
+                                                                >
+                                                                    🗑️ حذف
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer className="container mx-auto px-6 py-8 text-center border-t border-purple-500/20">
+                        <p className="text-slate-400">© 2025 Mokhtari Nour El Houda - جميع الحقوق محفوظة</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<Portfolio />, document.getElementById('root'));
+    </script>
 </body>
 </html>
