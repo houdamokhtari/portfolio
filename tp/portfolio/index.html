@@ -20,21 +20,32 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Mock local storage
-        const mockStorage = {
+        const storage = {
             async get(key) {
-                const stored = localStorage.getItem(key);
-                if (stored) return { key, value: stored };
-                throw new Error('Key not found');
+                try {
+                    const result = await window.storage.get(key, true);
+                    return result;
+                } catch (error) {
+                    console.log('Key not found:', key);
+                    return null;
+                }
             },
             async set(key, value) {
-                localStorage.setItem(key, value);
-                return { key, value };
+                try {
+                    return await window.storage.set(key, value, true);
+                } catch (error) {
+                    console.error('Storage error:', error);
+                    return null;
+                }
             },
             async delete(key) {
-                localStorage.removeItem(key);
-                return { key, deleted: true };
-            },
+                try {
+                    return await window.storage.delete(key, true);
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    return null;
+                }
+            }
         };
 
         function Portfolio() {
@@ -42,13 +53,12 @@
             const [tps, setTps] = useState([]);
             const [showUploadForm, setShowUploadForm] = useState(false);
             const [formData, setFormData] = useState({ tpFile: null, image: null, tpName: '' });
+            const [loading, setLoading] = useState(true);
 
-            // بيانات الصورة الشخصية والمشاريع
             const profileData = {
-                // أضف رابط صورتك الشخصية هنا
-                profileImage: "IMG_1017.JPG",
-                // أو استخدم إيموجي كبديل إذا لم يكن لديك صورة
-                
+                profileImage: "https://i.imgur.com/yourimage.jpg",
+                name: "مختاري نور الهدى",
+                title: "طالبة هندسة برمجيات"
             };
 
             const projects = [
@@ -57,9 +67,9 @@
                     description: 'موقع إعلامي شامل عن فلسطين', 
                     tech: ['HTML','CSS','JavaScript'], 
                     color: 'from-green-500 to-emerald-600',
-                    link: "https://example.com/palestine", // أضف رابط مشروعك هنا
-                    image: "d0e28264-9d53-4c87-bacb-ef73592ed5f7.jpg",
-                    github: "https://github.com/houdamokhtari/palestine" // رابط GitHub إذا موجود
+                    link: "https://example.com/palestine",
+                    image: "https://images.unsplash.com/photo-1580974852861-c381510bc98a?w=500",
+                    github: "https://github.com/houdamokhtari/palestine"
                 },
                 { 
                     title: 'موقع لوازم حلويات', 
@@ -67,65 +77,50 @@
                     tech: ['PHP','JavaScript','CSS'], 
                     color: 'from-pink-500 to-rose-600',
                     link: "https://example.com/sweets-store",
-                    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+                    image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500",
                     github: "https://github.com/yourusername/sweets-store"
                 },
                 { 
                     title: 'موقع أرصاد جوية', 
                     description: 'تطبيق للتنبؤات الجوية', 
-                    tech: ['JavaScript','API','CSS'], 
+                    tech: ['JavaScript','API','CSS'],
                     color: 'from-blue-500 to-cyan-600',
-                    link: "https://example.com/weather-app",
-                    image: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                    github: "https://github.com/yourusername/weather-app"
-                },
-                { 
-                    title: 'Chatbot', 
-                    description: 'روبوت محادثة ذكي', 
-                    tech: ['Python','NLP'], 
-                    color: 'from-purple-500 to-indigo-600',
-                    link: "https://example.com/chatbot",
-                    image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
-                    github: "https://github.com/yourusername/chatbot"
-                },
-            ];
-
-            const skills = [
-                { name: 'Python', level: 90, icon: '🐍' },
-                { name: 'Java', level: 85, icon: '☕' },
-                { name: 'JavaScript', level: 88, icon: '⚡' },
-                { name: 'PHP', level: 80, icon: '🐘' },
-                { name: 'HTML', level: 95, icon: '📄' },
-                { name: 'CSS', level: 92, icon: '🎨' },
-                { name: 'Figma', level: 85, icon: '🎯' },
+                    link: "https://example.com/weather",
+                    image: "https://images.unsplash.com/photo-1592210454359-9043f067919b?w=500",
+                    github: "https://github.com/yourusername/weather"
+                }
             ];
 
             useEffect(() => {
-                loadTPs();
+                loadTps();
             }, []);
 
-            const loadTPs = async () => {
+            const loadTps = async () => {
+                setLoading(true);
                 try {
-                    const result = await mockStorage.get('portfolio-tps');
-                    if (result) setTps(JSON.parse(result.value));
-                } catch {
-                    setTps([]);
+                    const result = await storage.get('tps_list');
+                    if (result && result.value) {
+                        const tpsData = JSON.parse(result.value);
+                        setTps(tpsData);
+                    }
+                } catch (error) {
+                    console.error('Error loading TPs:', error);
                 }
+                setLoading(false);
             };
 
-            const saveTPs = async (newTps) => {
-                await mockStorage.set('portfolio-tps', JSON.stringify(newTps));
-                setTps(newTps);
-            };
-
-            const handleFileChange = (e, type) => {
+            const handleFileChange = (e, fieldName) => {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (event) => {
-                        setFormData((prev) => ({
+                        setFormData(prev => ({
                             ...prev,
-                            [type]: { name: file.name, data: event.target.result, type: file.type },
+                            [fieldName]: {
+                                name: file.name,
+                                data: event.target.result,
+                                type: file.type
+                            }
                         }));
                     };
                     reader.readAsDataURL(file);
@@ -133,157 +128,104 @@
             };
 
             const handleUpload = async () => {
-                if (formData.tpFile && formData.image && formData.tpName) {
-                    const newTP = {
-                        id: Date.now(),
-                        name: formData.tpName,
-                        tpFile: formData.tpFile,
-                        image: formData.image,
-                        uploadDate: new Date().toLocaleDateString('ar-DZ'),
-                        corrected: false,
-                    };
-                    const updatedTps = [...tps, newTP];
-                    await saveTPs(updatedTps);
-                    setFormData({ tpFile: null, image: null, tpName: '' });
-                    setShowUploadForm(false);
+                if (!formData.tpFile || !formData.image || !formData.tpName) {
+                    alert('الرجاء ملء جميع الحقول');
+                    return;
                 }
-            };
 
-            const handleDownload = (file, fileName) => {
-                const link = document.createElement('a');
-                link.href = file.data;
-                link.download = fileName;
-                link.click();
+                const newTp = {
+                    id: Date.now().toString(),
+                    name: formData.tpName,
+                    tpFile: formData.tpFile,
+                    image: formData.image,
+                    uploadDate: new Date().toLocaleDateString('ar-EG'),
+                    corrected: false
+                };
+
+                const updatedTps = [...tps, newTp];
+                setTps(updatedTps);
+                
+                await storage.set('tps_list', JSON.stringify(updatedTps));
+
+                setFormData({ tpFile: null, image: null, tpName: '' });
+                setShowUploadForm(false);
+                alert('تم رفع TP بنجاح!');
             };
 
             const handleDelete = async (id) => {
-                if (confirm('هل أنت متأكد من حذف هذا الـTP؟')) {
-                    const updatedTps = tps.filter((tp) => tp.id !== id);
-                    await saveTPs(updatedTps);
+                if (confirm('هل أنت متأكد من حذف هذا TP؟')) {
+                    const updatedTps = tps.filter(tp => tp.id !== id);
+                    setTps(updatedTps);
+                    await storage.set('tps_list', JSON.stringify(updatedTps));
                 }
             };
 
+            const handleDownload = (fileData, fileName) => {
+                const link = document.createElement('a');
+                link.href = fileData.data;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
             const openLink = (url) => {
-                if (url && url !== "https://example.com/...") {
-                    window.open(url, '_blank');
-                } else {
-                    alert('الرابط غير متوفر حالياً');
-                }
+                window.open(url, '_blank');
             };
 
             return (
                 <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
-                    {/* Switcher */}
-                    <div className="fixed top-4 right-4 z-50 flex gap-2">
-                        <button 
-                            onClick={() => setUserRole('student')} 
-                            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-                                userRole === 'student' 
-                                ? 'bg-purple-600 shadow-lg shadow-purple-500/50' 
-                                : 'bg-slate-700 hover:bg-slate-600'
-                            }`}
-                        >
-                            👩‍🎓 طالبة
-                        </button>
-                        <button 
-                            onClick={() => setUserRole('teacher')} 
-                            className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${
-                                userRole === 'teacher' 
-                                ? 'bg-emerald-600 shadow-lg shadow-emerald-500/50' 
-                                : 'bg-slate-700 hover:bg-slate-600'
-                            }`}
-                        >
-                            👩‍🏫 أستاذة
-                        </button>
-                    </div>
-
                     {/* Header */}
-                    <header className="container mx-auto px-6 pt-20 pb-16">
-                        <div className="flex flex-col md:flex-row items-center gap-8">
-                            <div className="relative group">
-                                <div className="w-40 h-40 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 p-1">
-                                    <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
-                                        {profileData.useEmoji ? (
-                                            <span className="text-6xl">{profileData.profileEmoji}</span>
-                                        ) : (
-                                            <img 
-                                                src={profileData.profileImage} 
-                                                alt="الصورة الشخصية"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="absolute inset-0 rounded-full bg-purple-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
+                    <header className="container mx-auto px-6 py-8">
+                        <div className="flex justify-between items-center">
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => setUserRole('student')}
+                                    className={`px-6 py-2 rounded-lg transition-all ${userRole === 'student' ? 'bg-purple-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                                >
+                                    👨‍🎓 طالب
+                                </button>
+                                <button 
+                                    onClick={() => setUserRole('teacher')}
+                                    className={`px-6 py-2 rounded-lg transition-all ${userRole === 'teacher' ? 'bg-purple-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+                                >
+                                    👨‍🏫 أستاذ
+                                </button>
                             </div>
-                            <div className="text-center md:text-right flex-1">
-                                <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                    Mokhtari Nour El Houda
-                                </h1>
-                                <p className="text-2xl text-purple-300 mb-4">IDTW M2 G2</p>
-                                <div className="flex gap-4 justify-center md:justify-end mt-6">
-                                    <button 
-                                        onClick={() => openLink("https://github.com/houdamokhtari")}
-                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-                                    >
-                                        <span>🐙</span>
-                                        GitHub
-                                    </button>
-                                    <button 
-                                        onClick={() => openLink("https://linkedin.com/in/yourprofile")}
-                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-                                    >
-                                        <span>💼</span>
-                                        LinkedIn
-                                    </button>
-                                    <button 
-                                        onClick={() => openLink("mailto:mokhtarinourelhouda64@example.com")}
-                                        className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
-                                    >
-                                        <span>📧</span>
-                                        Email
-                                    </button>
-                                </div>
-                            </div>
+                            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                Portfolio
+                            </h1>
                         </div>
                     </header>
 
-                    {/* Skills */}
-                    <section className="container mx-auto px-6 py-16">
-                        <h2 className="text-4xl font-bold mb-12 text-center">المهارات التقنية</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {skills.map((skill, index) => (
-                                <div key={index} className="bg-slate-800/50 p-6 rounded-xl border border-purple-500/20">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-xl font-semibold">{skill.name}</span>
-                                        <span className="text-3xl">{skill.icon}</span>
-                                    </div>
-                                    <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                                        <div 
-                                            className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full" 
-                                            style={{ width: `${skill.level}%` }}
-                                        ></div>
-                                    </div>
-                                    <p className="text-right mt-2 text-sm text-purple-300">{skill.level}%</p>
-                                </div>
-                            ))}
+                    {/* Hero */}
+                    <section className="container mx-auto px-6 py-16 text-center">
+                        <div className="bg-slate-800/50 rounded-xl p-12 backdrop-blur-sm border border-purple-500/20">
+                            <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-6xl">
+                                👩‍💻
+                            </div>
+                            <h2 className="text-5xl font-bold mb-4">مختاري نور الهدى</h2>
+                            <p className="text-2xl text-purple-300 mb-6">طالبة هندسة برمجيات</p>
+                            <p className="text-slate-300 max-w-2xl mx-auto text-lg">
+                                مرحباً بكم في معرض أعمالي! أنا طالبة شغوفة بتطوير الويب والتصميم ثلاثي الأبعاد
+                            </p>
                         </div>
                     </section>
 
                     {/* Projects */}
                     <section className="container mx-auto px-6 py-16">
-                        <h2 className="text-4xl font-bold mb-12 text-center">المشاريع</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <h2 className="text-4xl font-bold text-center mb-12">المشاريع</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {projects.map((project, i) => (
-                                <div key={i} className="bg-slate-800/50 rounded-xl border border-purple-500/20 overflow-hidden hover:transform hover:scale-105 transition-all duration-300">
-                                    <div 
-                                        className={`h-48 bg-gradient-to-r ${project.color} relative overflow-hidden cursor-pointer`}
-                                        onClick={() => openLink(project.link)}
-                                    >
+                                <div key={i} className="bg-slate-800/50 rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/50 transition-all transform hover:scale-105">
+                                    <div className="relative h-48 overflow-hidden">
                                         <img 
                                             src={project.image} 
                                             alt={project.title}
                                             className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
                                         />
                                         <div className="absolute inset-0 bg-black bg-opacity-40 hover:bg-opacity-20 transition-all"></div>
                                     </div>
@@ -338,7 +280,7 @@
                                     <h3 className="text-2xl font-bold mb-4 text-right">رفع TP جديد</h3>
                                     <div className="space-y-4">
                                         <input 
-                                            type="text" 
+                                            type="text"
                                             placeholder="اسم TP" 
                                             value={formData.tpName}
                                             onChange={(e) => setFormData({ ...formData, tpName: e.target.value })}
@@ -377,7 +319,7 @@
                                         <button 
                                             onClick={handleUpload}
                                             disabled={!formData.tpFile || !formData.image || !formData.tpName}
-                                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50"
+                                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             رفع TP
                                         </button>
@@ -387,10 +329,18 @@
 
                             {/* TP List */}
                             <div className="space-y-4">
-                                {tps.length === 0 ? (
+                                {loading ? (
+                                    <div className="text-center py-12 text-slate-400">
+                                        <div className="text-6xl mb-4">⏳</div>
+                                        <p className="text-xl">جاري التحميل...</p>
+                                    </div>
+                                ) : tps.length === 0 ? (
                                     <div className="text-center py-12 text-slate-400">
                                         <div className="text-6xl mb-4">📄</div>
                                         <p className="text-xl">لا توجد أعمال تطبيقية حالياً</p>
+                                        {userRole === 'student' && (
+                                            <p className="text-sm mt-2">اضغط على "إضافة TP جديد" للبدء</p>
+                                        )}
                                     </div>
                                 ) : (
                                     tps.map((tp) => (
@@ -430,7 +380,7 @@
                                                                     onClick={() => handleDelete(tp.id)}
                                                                     className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg flex items-center gap-2"
                                                                 >
-                                                                    🗑️ حذف
+                                                                    🗑 حذف
                                                                 </button>
                                                             </>
                                                         )}
